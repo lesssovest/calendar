@@ -1,14 +1,16 @@
-# Welcome to your Lovable project
+# Update Scheduler
+
+Сделай мне в стиле нашей системы  (цвета, минимализм) (приложила скриншот с новостью там есть небольшая картинка с элементом из нашей системы, тебе нужны только цвета оттуда) работающий календарик с публикацией новостей. для контекста: у нас есть система, мы частенько когда добавляем что-то в нее делаем рассылку на почту польщователям об обновлениях. У нас есть несколько команд, которые разрабатывают разные части этой системы и частенько к нам могут одновременно 2-3 команды с просьбой опубликовать рассылку с из обновлением. Проблема какая - в один день мы можем публиковать больше одной рассылки (но не должны пересекаться целевые аудитории), и каждый день тоже лучше не делать, самые хорошие дни - все кроме понедельника и пятницы, сделай интерактивный каледарь, который я смогу направлять командам, и они будут забиывать себе дни для публикаций (должна быть возможность удаления, переноса, может тэг какой-то "важная" что-ли). Данные должны при этом где-то сохраняться, чтобы команды могли смотреть где кто забронировал. Для начала сделай в формате того, что редактировать смогу только я этот календарь (без входа и регистрации). Но все данные должны где-то сохраняться и не теряться и пусть будет возможность выгрузить в формате excel этот календарь. О каждой публикации должна храниться следующая информация: название, краткое описание, заказчик, статус (драфт, отложена, опубликована)
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/91813015-02b5-48d1-a53d-35ef533d9050).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +22,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
