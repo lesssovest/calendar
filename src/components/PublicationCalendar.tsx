@@ -53,7 +53,7 @@ export function PublicationCalendar() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["publications"] });
 
   const saveMutation = useMutation({
-    mutationFn: async (values: FormValues & { id?: string }) => {
+    mutationFn: async (values: FormValues & { id?: string | undefined }) => {
       const payload = { ...values, code: code ?? "" };
       if (values.id) await updatePublication({ data: { ...payload, id: values.id } });
       else await createPublication({ data: payload });
