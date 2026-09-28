@@ -31,9 +31,10 @@ export function toISODate(date: Date): string {
 }
 
 export function parseISODate(iso: string): Date {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d);
+  const parts = iso.split("-").map(Number);
+  return new Date(parts[0] ?? 1970, (parts[1] ?? 1) - 1, parts[2] ?? 1);
 }
+
 
 /** Days of the visible month grid, starting on Monday. */
 export function buildMonthGrid(year: number, month: number): Date[] {
@@ -74,15 +75,17 @@ export function audienceConflicts(items: Publication[]): Set<string> {
   for (const list of byDay.values()) {
     for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
-        const a = normalizeAudience(list[i].audience);
-        const b = normalizeAudience(list[j].audience);
-        if (a === b) {
-          conflicts.add(list[i].id);
-          conflicts.add(list[j].id);
+        const first = list[i];
+        const second = list[j];
+        if (!first || !second) continue;
+        if (normalizeAudience(first.audience) === normalizeAudience(second.audience)) {
+          conflicts.add(first.id);
+          conflicts.add(second.id);
         }
       }
     }
   }
+
   return conflicts;
 }
 

@@ -27,7 +27,7 @@ export function PublicationForm({
   publication: Publication | null;
   onCancel: () => void;
   onSubmit: (values: FormValues) => Promise<void>;
-  onDelete?: () => Promise<void>;
+  onDelete?: (() => Promise<void>) | undefined;
 }) {
   const [values, setValues] = useState<FormValues>({
     publish_date: publication?.publish_date ?? initialDate,
