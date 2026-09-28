@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS publications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   publish_date DATE NOT NULL,
@@ -11,8 +13,7 @@ CREATE TABLE IF NOT EXISTS publications (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS publications_publish_date_idx
-  ON publications (publish_date);
+CREATE INDEX IF NOT EXISTS publications_publish_date_idx ON publications (publish_date);
 
 CREATE UNIQUE INDEX IF NOT EXISTS publications_date_audience_unique_idx
   ON publications (publish_date, lower(btrim(audience)))
