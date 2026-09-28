@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PublicationForm, type FormValues } from "@/components/PublicationForm";
 import {
@@ -110,11 +110,11 @@ export function PublicationCalendar() {
   }
 
   // Восстанавливаем режим редактирования после перезагрузки страницы.
-  useMemo(() => {
-    if (typeof window === "undefined" || code) return;
+  useEffect(() => {
     const stored = sessionStorage.getItem(CODE_KEY);
     if (stored) setCode(stored);
-  }, [code]);
+  }, []);
+
 
   const canEdit = Boolean(code);
 
