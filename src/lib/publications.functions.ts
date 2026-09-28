@@ -25,33 +25,38 @@ const payloadSchema = z.object({
   important: z.boolean(),
 });
 
+function normalizeAdminCode(value: string) {
+  return value.trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+}
+
 function assertCode(code: string) {
   const expected = process.env["CALENDAR_ADMIN_CODE"];
   if (!expected) throw new Error("Код редактирования не настроен");
-  if (code !== expected) throw new Error("Неверный код редактирования");
+  if (normalizeAdminCode(code) !== normalizeAdminCode(expected)) {
+    throw new Error("Неверный код редактирования");
+  }
 }
 
 function publicationWriteError(message: string): never {
-  // PostgreSQL unique_violation from the date/audience index.
   if (message.includes("publications_date_audience_unique_idx") || message.includes("duplicate key value")) {
     throw new Error("На эту дату уже запланирована рассылка для этой целевой аудитории. Выберите другой день или аудиторию.");
   }
   throw new Error(message);
 }
 
-async function admin() {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin;
+async function db() {
+  const { sql } = await import("@/integrations/neon/client.server");
+  return sql;
 }
 
 export const listPublications = createServerFn({ method: "GET" }).handler(async () => {
-  const db = await admin();
-  const { data, error } = await db
-    .from("publications")
-    .select("id, publish_date, title, description, customer, audience, status, important")
-    .order("publish_date", { ascending: true });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Publication[];
+  const sql = await db();
+  const rows = await sql`
+    SELECT id::text, publish_date::text, title, description, customer, audience, status::text, important
+    FROM publications
+    ORDER BY publish_date ASC, created_at ASC
+  `;
+  return rows as Publication[];
 });
 
 export const checkCode = createServerFn({ method: "POST" })
@@ -65,10 +70,18 @@ export const createPublication = createServerFn({ method: "POST" })
   .inputValidator((d) => payloadSchema.parse(d))
   .handler(async ({ data }) => {
     assertCode(data.code);
-    const db = await admin();
-    const { code: _code, ...row } = data;
-    const { error } = await db.from("publications").insert(row);
-    if (error) publicationWriteError(error.message);
+    const sql = await db();
+    try {
+      await sql`
+        INSERT INTO publications
+          (publish_date, title, description, customer, audience, status, important)
+        VALUES
+          (${data.publish_date}, ${data.title.trim()}, ${data.description || null},
+           ${data.customer.trim()}, ${data.audience?.trim() || null}, ${data.status}, ${data.important})
+      `;
+    } catch (error) {
+      publicationWriteError(error instanceof Error ? error.message : String(error));
+    }
     return { ok: true };
   });
 
@@ -76,31 +89,46 @@ export const updatePublication = createServerFn({ method: "POST" })
   .inputValidator((d) => payloadSchema.extend({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertCode(data.code);
-    const db = await admin();
-    const { code: _code, id, ...row } = data;
-    const { error } = await db.from("publications").update(row).eq("id", id);
-    if (error) publicationWriteError(error.message);
+    const sql = await db();
+    try {
+      await sql`
+        UPDATE publications
+        SET publish_date = ${data.publish_date},
+            title = ${data.title.trim()},
+            description = ${data.description || null},
+            customer = ${data.customer.trim()},
+            audience = ${data.audience?.trim() || null},
+            status = ${data.status},
+            important = ${data.important},
+            updated_at = now()
+        WHERE id = ${data.id}::uuid
+      `;
+    } catch (error) {
+      publicationWriteError(error instanceof Error ? error.message : String(error));
+    }
     return { ok: true };
   });
 
 export const movePublication = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z
-      .object({
-        code: z.string().min(1),
-        id: z.string().uuid(),
-        publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      })
-      .parse(d),
+    z.object({
+      code: z.string().min(1),
+      id: z.string().uuid(),
+      publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    }).parse(d),
   )
   .handler(async ({ data }) => {
     assertCode(data.code);
-    const db = await admin();
-    const { error } = await db
-      .from("publications")
-      .update({ publish_date: data.publish_date })
-      .eq("id", data.id);
-    if (error) publicationWriteError(error.message);
+    const sql = await db();
+    try {
+      await sql`
+        UPDATE publications
+        SET publish_date = ${data.publish_date}, updated_at = now()
+        WHERE id = ${data.id}::uuid
+      `;
+    } catch (error) {
+      publicationWriteError(error instanceof Error ? error.message : String(error));
+    }
     return { ok: true };
   });
 
@@ -108,8 +136,7 @@ export const deletePublication = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ code: z.string().min(1), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertCode(data.code);
-    const db = await admin();
-    const { error } = await db.from("publications").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    const sql = await db();
+    await sql`DELETE FROM publications WHERE id = ${data.id}::uuid`;
     return { ok: true };
   });
