@@ -99,13 +99,23 @@ export function PublicationCalendar() {
   async function unlock() {
     setCodeError(null);
     try {
-      await checkCode({ data: { code: codeInput.trim() } });
+      const result = await checkCode({ data: { code: codeInput.trim() } });
+      if (!result.ok) {
+        setCodeError(
+          result.reason === "not_configured"
+            ? "Код редактирования не настроен на сервере"
+            : "Неверный код",
+        );
+        return;
+      }
+
       setCode(codeInput.trim());
       sessionStorage.setItem(CODE_KEY, codeInput.trim());
       setShowCodeBox(false);
       setCodeInput("");
-    } catch {
-      setCodeError("Неверный код");
+    } catch (error) {
+      console.error("Editor code check failed:", error);
+      setCodeError("Не удалось проверить код. Обновите страницу и попробуйте снова.");
     }
   }
 
