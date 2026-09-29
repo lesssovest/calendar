@@ -1,18 +1,20 @@
 import { neon } from "@neondatabase/serverless";
 
-let _sql: ReturnType<typeof neon> | undefined;
+type NeonSql = ReturnType<typeof neon>;
 
-function createNeonClient() {
-  const databaseUrl = process.env["NEON_DATABASE_URL"];
-  if (!databaseUrl) {
-    throw new Error("Missing NEON_DATABASE_URL environment variable.");
+let client: NeonSql | undefined;
+
+function getClient(): NeonSql {
+  if (!client) {
+    const databaseUrl = process.env["NEON_DATABASE_URL"];
+    if (!databaseUrl) {
+      throw new Error("Missing NEON_DATABASE_URL environment variable.");
+    }
+    client = neon(databaseUrl);
   }
-  return neon(databaseUrl);
+  return client;
 }
 
-export const sql = new Proxy({} as ReturnType<typeof neon>, {
-  get(_, prop, receiver) {
-    if (!_sql) _sql = createNeonClient();
-    return Reflect.get(_sql, prop, receiver);
-  },
-});
+export const sql = ((...args: Parameters<NeonSql>) => {
+  return getClient()(...args);
+}) as NeonSql;
