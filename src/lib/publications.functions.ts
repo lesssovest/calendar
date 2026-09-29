@@ -62,8 +62,17 @@ export const listPublications = createServerFn({ method: "GET" }).handler(async 
 export const checkCode = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ code: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
-    assertCode(data.code);
-    return { ok: true };
+    const expected = process.env["CALENDAR_ADMIN_CODE"];
+
+    if (!expected) {
+      return { ok: false as const, reason: "not_configured" as const };
+    }
+
+    if (normalizeAdminCode(data.code) !== normalizeAdminCode(expected)) {
+      return { ok: false as const, reason: "invalid_code" as const };
+    }
+
+    return { ok: true as const };
   });
 
 export const createPublication = createServerFn({ method: "POST" })
