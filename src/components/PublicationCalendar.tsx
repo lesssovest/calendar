@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
 import { PublicationForm, type FormValues } from "@/components/PublicationForm";
+import { PublicationRequestForm } from "@/components/PublicationRequestForm";
 import {
   MONTHS,
   STATUS_LABELS,
@@ -43,6 +44,7 @@ export function PublicationCalendar() {
   );
   const [dragId, setDragId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Publication | null>(null);
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: publications = [], isLoading } = useQuery({
@@ -147,6 +149,12 @@ export function PublicationCalendar() {
               className="rounded-lg border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
             >
               Выгрузить в Excel
+            </button>
+            <button
+              onClick={() => setShowRequestForm(true)}
+              className="rounded-lg border border-primary/40 bg-card px-3.5 py-2 text-sm font-semibold text-primary transition hover:bg-accent"
+            >
+              Подать заявку на публикацию
             </button>
             {canEdit ? (
               <span className="rounded-lg bg-mint px-3.5 py-2 text-sm font-semibold text-mint-foreground">
@@ -324,6 +332,15 @@ export function PublicationCalendar() {
         </p>
         {isLoading && <p className="mt-2 text-xs text-muted-foreground">Загружаем данные…</p>}
       </div>
+
+      {showRequestForm && (
+        <Modal title="Заявка на публикацию" onClose={() => setShowRequestForm(false)}>
+          <PublicationRequestForm
+            initialDate={toISODate(today)}
+            onClose={() => setShowRequestForm(false)}
+          />
+        </Modal>
+      )}
 
       {editor && (
         <Modal
