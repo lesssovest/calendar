@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { STATUS_LABELS, type PublicationStatus } from "@/lib/calendar-utils";
+import { STATUS_LABELS } from "@/lib/calendar-utils";
+import type { PublicationStatus } from "@/lib/publications.functions";
 import { sendPublicationRequest } from "@/lib/request.functions";
 
 const inputClass =
