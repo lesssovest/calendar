@@ -13,7 +13,12 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write ."
   },
-  "overrides": {"rolldown": "1.2.1"},
+  "overrides": {
+    "rolldown": "1.2.1",
+    "@tanstack/router-core": "1.171.34",
+    "@tanstack/start-plugin-core": "1.171.49",
+    "@tanstack/start-server-core": "1.169.39"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.1.0",
@@ -47,9 +52,9 @@
     "@supabase/supabase-js": "^2.117.2",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
-    "@tanstack/react-router": "1.170.18",
+    "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",
-    "@tanstack/router-plugin": "1.168.23",
+    "@tanstack/router-plugin": "1.168.42",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
